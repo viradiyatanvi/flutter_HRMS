@@ -8,7 +8,7 @@ const authenticateJWT = (req, res, next) => {
   if (authHeader) {
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, "HRMS" || 'your-secret-key', async (err, decoded) => {
+    jwt.verify(token, "HRMS" || 'HRMS', async (err, decoded) => {
       if (err) {
         return res.sendStatus(403);
       }

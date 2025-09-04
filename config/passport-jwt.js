@@ -6,7 +6,7 @@ const User = require('../models/User');
 
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: "HRMS" || 'your-secret-key'
+  secretOrKey: "HRMS" || 'HRMS'
 };
 
 passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {

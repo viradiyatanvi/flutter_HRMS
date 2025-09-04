@@ -1,160 +1,231 @@
+// const express = require('express');
+// const Role = require('../models/Role');
+// const { authenticateJWT, authorize } = require('../middleware/auth');
+// const router = express.Router();
+
+// // Get all roles
+// router.get('/', authenticateJWT, authorize([{ module: 'Role', permission: 'manage' }]), async (req, res) => {
+//   try {
+//     const roles = await Role.find();
+//     res.json(roles);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// // Get role by ID
+// router.get('/:id', authenticateJWT, authorize([{ module: 'Role', permission: 'manage' }]), async (req, res) => {
+//   try {
+//     const role = await Role.findById(req.params.id);
+    
+//     if (!role) {
+//       return res.status(404).json({ message: 'Role not found' });
+//     }
+    
+//     res.json(role);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// // Create new role
+// router.post('/', authenticateJWT, authorize([{ module: 'Role', permission: 'create' }]), async (req, res) => {
+//   try {
+//     const { name, description, permissions, accessLevel, isActive } = req.body;
+    
+//     const existingRole = await Role.findOne({ name });
+//     if (existingRole) {
+//       return res.status(400).json({ message: 'Role already exists with this name' });
+//     }
+    
+//     const newRole = new Role({
+//       name,
+//       description,
+//       permissions,
+//       accessLevel,
+//       isActive: isActive !== undefined ? isActive : true
+//     });
+    
+//     await newRole.save();
+//     res.status(201).json(newRole);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// // Update role
+// router.put('/:id', authenticateJWT, authorize([{ module: 'Role', permission: 'edit' }]), async (req, res) => {
+//   try {
+//     const { name, description, permissions, accessLevel, isActive } = req.body;
+    
+//     const role = await Role.findById(req.params.id);
+//     if (!role) {
+//       return res.status(404).json({ message: 'Role not found' });
+//     }
+    
+//     if (name && name !== role.name) {
+//       const existingRole = await Role.findOne({ name });
+//       if (existingRole) {
+//         return res.status(400).json({ message: 'Role name already taken' });
+//       }
+//       role.name = name;
+//     }
+    
+//     if (description) role.description = description;
+//     if (permissions) role.permissions = permissions;
+//     if (accessLevel) role.accessLevel = accessLevel;
+//     if (isActive !== undefined) role.isActive = isActive;
+    
+//     await role.save();
+//     res.json(role);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// // Delete role
+// router.delete('/:id', authenticateJWT, authorize([{ module: 'Role', permission: 'delete' }]), async (req, res) => {
+//   try {
+//     const role = await Role.findById(req.params.id);
+    
+//     if (!role) {
+//       return res.status(404).json({ message: 'Role not found' });
+//     }
+    
+//     // Check if any user is using this role
+//     const User = require('../models/User');
+//     const usersWithRole = await User.countDocuments({ role: req.params.id });
+    
+//     if (usersWithRole > 0) {
+//       return res.status(400).json({ 
+//         message: 'Cannot delete role. There are users assigned to this role.' 
+//       });
+//     }
+    
+//     await Role.findByIdAndDelete(req.params.id);
+//     res.json({ message: 'Role deleted successfully' });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// module.exports = router;
+
+
 const express = require('express');
-const User = require('../models/User');
+const Role = require('../models/Role');
 const { authenticateJWT, authorize } = require('../middleware/auth');
 const router = express.Router();
 
-router.post('/setup', async (req, res) => {
+// Get all roles
+router.get('/',async (req, res) => {
   try {
-    const existingAdmin = await User.findOne({ email: 'admin@hrms.com' });
-    if (existingAdmin) {
-      return res.status(400).json({ message: 'Setup already completed' });
-    }
-
-    const Role = require('../models/Role');
-    let adminRole = await Role.findOne({ name: 'Admin' });
-    
-    if (!adminRole) {
-      adminRole = new Role({
-        name: 'Admin',
-        description: 'Full access to all modules',
-        accessLevel: 'Admin',
-        permissions: [
-          {
-            module: 'User',
-            permissions: { manage: true, create: true, edit: true, delete: true }
-          },
-          {
-            module: 'Role',
-            permissions: { manage: true, create: true, edit: true, delete: true }
-          }
-        ],
-        isActive: true
-      });
-      await adminRole.save();
-    }
-
-    const adminUser = new User({
-      name: 'Administrator',
-      email: 'admin@hrms.com',
-      password: 'admin123',
-      role: adminRole._id,
-      isActive: true
-    });
-
-    await adminUser.save();
-
-    res.status(201).json({ 
-      message: 'Setup completed successfully',
-      user: { email: 'admin@hrms.com', password: 'admin123' }
-    });
+    const roles = await Role.find();
+    res.json(roles);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Setup failed' });
+    res.status(200).json({ message: 'Server error' });
   }
 });
 
-// Get all users
-router.get('/', authenticateJWT, authorize([{ module: 'User', permission: 'manage' }]), async (req, res) => {
+// Get role by ID
+router.get('/:id', async (req, res) => {
   try {
-    const users = await User.find().populate('role').select('-password');
-    res.json(users);
+    const role = await Role.findById(req.params.id);
+    
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    
+    res.json(role);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get user by ID
-router.get('/:id', authenticateJWT, authorize([{ module: 'User', permission: 'manage' }]), async (req, res) => {
+// Create new role
+router.post('/create', async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).populate('role').select('-password');
+    const { name, description, permissions, accessLevel, isActive } = req.body;
     
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const existingRole = await Role.findOne({ name });
+    if (existingRole) {
+      return res.status(400).json({ message: 'Role already exists with this name' });
     }
     
-    res.json(user);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Create new user
-router.post('/', authenticateJWT, authorize([{ module: 'User', permission: 'create' }]), async (req, res) => {
-  try {
-    const { name, email, password, role, isActive } = req.body;
-    
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email' });
-    }
-    
-    const newUser = new User({
+    const newRole = new Role({
       name,
-      email,
-      password,
-      role,
+      description,
+      permissions,
+      accessLevel,
       isActive: isActive !== undefined ? isActive : true
     });
     
-    await newUser.save();
-    
-    const user = await User.findById(newUser._id).populate('role').select('-password');
-    res.status(201).json(user);
+    await newRole.save();
+    res.status(201).json(newRole);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Update user
-router.put('/:id', authenticateJWT, authorize([{ module: 'User', permission: 'edit' }]), async (req, res) => {
+// Update role
+router.put('/:id', async (req, res) => {
   try {
-    const { name, email, role, isActive } = req.body;
+    const { name, description, permissions, accessLevel, isActive } = req.body;
     
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const role = await Role.findById(req.params.id);
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
     }
     
-    if (email && email !== user.email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ message: 'Email already taken' });
+    if (name && name !== role.name) {
+      const existingRole = await Role.findOne({ name });
+      if (existingRole) {
+        return res.status(400).json({ message: 'Role name already taken' });
       }
-      user.email = email;
+      role.name = name;
     }
     
-    if (name) user.name = name;
-    if (role) user.role = role;
-    if (isActive !== undefined) user.isActive = isActive;
+    if (description) role.description = description;
+    if (permissions) role.permissions = permissions;
+    if (accessLevel) role.accessLevel = accessLevel;
+    if (isActive !== undefined) role.isActive = isActive;
     
-    await user.save();
-    
-    const updatedUser = await User.findById(user._id).populate('role').select('-password');
-    res.json(updatedUser);
+    await role.save();
+    res.json(role);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Delete user
-router.delete('/:id', authenticateJWT, authorize([{ module: 'User', permission: 'delete' }]), async (req, res) => {
+// Delete role
+router.delete('/:id', async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const role = await Role.findById(req.params.id);
     
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    if (!role) {
+      return res.status(404).json({ message: 'Role not found' });
     }
     
-    if (req.user._id.toString() === user._id.toString()) {
-      return res.status(400).json({ message: 'Cannot delete your own account' });
+    const User = require('../models/User');
+    const usersWithRole = await User.countDocuments({ role: req.params.id });
+    
+    if (usersWithRole > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete role. There are users assigned to this role.' 
+      });
     }
     
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: 'User deleted successfully' });
+    await Role.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Role deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
