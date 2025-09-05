@@ -4,7 +4,6 @@
 // const userSchema = new mongoose.Schema({
 //   name: {
 //     type: String,
-//     // required: true,
 //     trim: true
 //   },
 //   email: {
@@ -16,10 +15,9 @@
 //   },
 //   password: {
 //     type: String,
-//     // required: true,
 //     minlength: 6
 //   },
-//     mobileNum: {
+//   mobileNum: {
 //     type: String,
 //     trim: true,
 //     default: ''
@@ -63,13 +61,18 @@
 
 // module.exports = mongoose.model('User', userSchema);
 
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  firstName: {
     type: String,
+    required: true,
+    trim: true
+  },
+  lastName: {
+    type: String,
+    required: true,
     trim: true
   },
   email: {

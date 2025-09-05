@@ -20,6 +20,10 @@ app.use(passport.initialize());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/roles', require('./routes/roles'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/attendance', require('./routes/attendance'));
+app.use('/api/payslips', require('./routes/payslip'));
+app.use('/api/announcements',require('./routes/announcements'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }
