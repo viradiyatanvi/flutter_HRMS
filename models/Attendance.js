@@ -50,4 +50,41 @@ const attendanceSchema = new mongoose.Schema({
 
 attendanceSchema.index({ user: 1, date: 1 }, { unique: true });
 
+// Virtual for formatted date
+attendanceSchema.virtual('formattedDate').get(function() {
+  return this.date.toLocaleDateString('en-GB');
+});
+
+// Virtual for formatted punch in time
+attendanceSchema.virtual('formattedPunchIn').get(function() {
+  return this.punchIn.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  });
+});
+
+// Virtual for formatted punch out time
+attendanceSchema.virtual('formattedPunchOut').get(function() {
+  if (!this.punchOut) return '--:--';
+  return this.punchOut.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  });
+});
+
+// Virtual for formatted total hours
+attendanceSchema.virtual('formattedTotalHours').get(function() {
+  if (this.totalHours === 0) return '--';
+  const hours = Math.floor(this.totalHours);
+  const minutes = Math.round((this.totalHours - hours) * 60);
+  return `${hours}h ${minutes}m`;
+});
+
+// Virtual for checking if punched in
+attendanceSchema.virtual('isPunchedIn').get(function() {
+  return !this.punchOut;
+});
+
 module.exports = mongoose.model('Attendance', attendanceSchema);
