@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const port = 8015;
 const passport = require('./config/passport-jwt');
@@ -24,6 +22,7 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/payslips', require('./routes/payslip'));
 app.use('/api/announcements',require('./routes/announcements'));
+app.use('/api/profile', require('./routes/profile'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }
