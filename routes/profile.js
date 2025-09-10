@@ -171,7 +171,6 @@ router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
   }
 });
 
-// In your routes/profile.js file
 // Add this route for creating profile
 router.post('/create', authenticateJWT, isEmployee, async (req, res) => {
   try {
@@ -266,10 +265,6 @@ router.get('/admin/all', authenticateJWT, async (req, res) => {
     const total = await UserProfile.countDocuments(filter);
 
     res.json({
-    //   profiles,
-    //   totalPages: Math.ceil(total / limit),
-    //   currentPage: page,
-    //   total
       profiles: profiles,
     totalPages: Math.ceil(total / limit),
     currentPage: page,
