@@ -147,11 +147,9 @@ router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
     let profile = await UserProfile.findOne({ user: req.user._id });
 
     if (!profile) {
-      // Create a basic profile if none exists
       profile = new UserProfile({ user: req.user._id });
       await profile.save();
       
-      // Update user reference to profile
       await User.findByIdAndUpdate(req.user._id, { profile: profile._id });
     }
 
@@ -228,7 +226,7 @@ router.post('/create', authenticateJWT, isEmployee, async (req, res) => {
   }
 });
 
-// Get all profiles (Admin/HR)
+// Get all profiles (Admin/HR) /// delete implimate
 router.get('/admin/all', authenticateJWT, async (req, res) => {
   try {
     if (!['Admin', 'HR Manager'].includes(req.user.role.accessLevel)) {
@@ -275,6 +273,23 @@ router.get('/admin/all', authenticateJWT, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+router.get('/admin/delete/:id',authenticateJWT,async(req,res)=>{
+  try{
+      let delId=req.params.id;
+      let findData=await User.findById(delId);
+      if(!findData){
+        return res.status(200).json({msg:"data not found"})
+      }
+      let deleteData=await User.findByIdAndDelete(delId);
+      if(deleteData){
+        return res.status(200).json({msg:"data deleted Successfully",data:deleteData})
+      }
+  }catch(err){
+    return res.status(200).json({msg:"Delete error",err:err})
+  }
+})
+
 
 // Helper function to check profile completion
 function checkProfileCompletion(profile) {

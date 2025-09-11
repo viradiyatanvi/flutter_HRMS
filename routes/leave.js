@@ -77,6 +77,50 @@ router.post('/admin/leave-types/create', authenticateJWT, async (req, res) => {
   }
 });
 
+// Delete leave type (admin only)
+router.delete('/admin/leave-types/del/:id', authenticateJWT, async (req, res) => {
+  try {
+    if (!['Admin', 'HR Manager'].includes(req.user.role.accessLevel)) {
+      return res.status(403).json({ message: 'Access denied. Admin/HR privileges required.' });
+    }
+
+    const leaveType = await LeaveType.findById(req.params.id);
+    
+    if (!leaveType) {
+      return res.status(404).json({ message: 'Leave type not found' });
+    }
+    
+    // Check if this leave type is being used in any leave applications
+    const applicationsCount = await LeaveApplication.countDocuments({ 
+      leaveType: req.params.id 
+    });
+    
+    if (applicationsCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete leave type. It is being used in existing leave applications.' 
+      });
+    }
+    
+    // Check if this leave type is being used in any leave balances
+    const balancesCount = await LeaveBalance.countDocuments({ 
+      leaveType: req.params.id 
+    });
+    
+    if (balancesCount > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete leave type. It is being used in existing leave balances.' 
+      });
+    }
+    
+    await LeaveType.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Leave type deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Update leave type (admin only)
 router.put('/admin/leave-types/:id', authenticateJWT, async (req, res) => {
   try {

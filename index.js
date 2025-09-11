@@ -24,6 +24,7 @@ app.use('/api/payslips', require('./routes/payslip'));
 app.use('/api/announcements',require('./routes/announcements'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/leave', require('./routes/leave'));
+app.use('/api/performance', require('./routes/performance'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }
