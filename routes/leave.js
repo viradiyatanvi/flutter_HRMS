@@ -90,7 +90,6 @@ router.delete('/admin/leave-types/del/:id', authenticateJWT, async (req, res) =>
       return res.status(404).json({ message: 'Leave type not found' });
     }
     
-    // Check if this leave type is being used in any leave applications
     const applicationsCount = await LeaveApplication.countDocuments({ 
       leaveType: req.params.id 
     });
@@ -101,7 +100,6 @@ router.delete('/admin/leave-types/del/:id', authenticateJWT, async (req, res) =>
       });
     }
     
-    // Check if this leave type is being used in any leave balances
     const balancesCount = await LeaveBalance.countDocuments({ 
       leaveType: req.params.id 
     });
@@ -243,7 +241,6 @@ router.put('/admin/applications/:id/status', authenticateJWT, async (req, res) =
     }
     
     if (status === 'Approved') {
-      // Update leave balance
       await LeaveCalculator.updateLeaveBalance(
         application.user._id,
         application.leaveType._id,
@@ -253,7 +250,6 @@ router.put('/admin/applications/:id/status', authenticateJWT, async (req, res) =
     
     await application.save();
     
-    // Populate approvedBy field for response
     await application.populate('approvedBy', 'firstName lastName');
     
     res.json(application);
@@ -436,7 +432,6 @@ router.get('/applications/:id', authenticateJWT, isEmployee, async (req, res) =>
       return res.status(404).json({ message: 'Leave application not found' });
     }
     
-    // Check if user owns the application or is admin/HR
     if (application.user._id.toString() !== req.user._id.toString() && 
         !['Admin', 'HR Manager', 'Team Manager'].includes(req.user.role.accessLevel)) {
       return res.status(403).json({ message: 'Access denied' });
@@ -491,7 +486,6 @@ router.get('/summary', authenticateJWT, isEmployee, async (req, res) => {
       status: 'Pending'
     });
     
-    // Get upcoming approved leaves
     const upcomingLeaves = await LeaveApplication.find({
       user: req.user._id,
       status: 'Approved',

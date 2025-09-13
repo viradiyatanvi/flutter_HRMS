@@ -25,6 +25,13 @@ app.use('/api/announcements',require('./routes/announcements'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/leave', require('./routes/leave'));
 app.use('/api/performance', require('./routes/performance'));
+app.use('/api/training', require('./routes/training'));
+app.use('/api/training', require('./routes/trainingUser'));
+app.use('/api/helpdesk/admin', require('./routes/helpdeskAdmin'));
+app.use('/api/helpdesk', require('./routes/helpdeskUser'));
+app.use('/api/calendar', require('./routes/calendarAdmin'));
+app.use('/api/calendar', require('./routes/calendarUser'));
+app.use('/api/documents', require('./routes/documents'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }
