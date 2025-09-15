@@ -32,6 +32,7 @@ app.use('/api/helpdesk', require('./routes/helpdeskUser'));
 app.use('/api/calendar', require('./routes/calendarAdmin'));
 app.use('/api/calendar', require('./routes/calendarUser'));
 app.use('/api/documents', require('./routes/documents'));
+app.use('/api/expense',require('./routes/Travel&Exprense'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }

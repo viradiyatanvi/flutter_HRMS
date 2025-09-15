@@ -70,7 +70,6 @@ router.post('/tickets', authenticateJWT, isEmployee, async (req, res) => {
       attachments: attachments || []
     });
 
-    // If category has a default assignee, assign the ticket
     if (categoryExists.defaultAssignee) {
       ticket.assignedTo = categoryExists.defaultAssignee;
       ticket.assignedAt = new Date();

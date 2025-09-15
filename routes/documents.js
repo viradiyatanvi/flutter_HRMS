@@ -168,8 +168,7 @@ router.get('/:id/download', authenticateJWT, async (req, res) => {
     if (!document) {
       return res.status(404).json({ message: 'Document not found' });
     }
-    
-    // Check if user has access to this document
+
     const userAccessLevel = req.user.role.accessLevel;
     if (!document.targetAudience.includes('All') && 
         !document.targetAudience.includes(userAccessLevel) &&
@@ -180,16 +179,13 @@ router.get('/:id/download', authenticateJWT, async (req, res) => {
     
     const filePath = path.join(__dirname, '..', document.fileUrl);
     
-    // Check if file exists
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: 'File not found' });
     }
-    
-    // Set headers for file download
+  
     res.setHeader('Content-Disposition', `attachment; filename="${document.fileName}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
     
-    // Stream the file to the client
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
     
