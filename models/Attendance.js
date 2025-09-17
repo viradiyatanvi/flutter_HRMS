@@ -57,7 +57,7 @@ attendanceSchema.virtual('formattedDate').get(function() {
 
 // Virtual for formatted punch in time
 attendanceSchema.virtual('formattedPunchIn').get(function() {
-  return this.punchIn.toLocaleTimeString('en-US', { 
+  return this.punchIn.toLocaleTimeString('en-IN', { 
     hour: '2-digit', 
     minute: '2-digit',
     hour12: false 
@@ -67,7 +67,7 @@ attendanceSchema.virtual('formattedPunchIn').get(function() {
 // Virtual for formatted punch out time
 attendanceSchema.virtual('formattedPunchOut').get(function() {
   if (!this.punchOut) return '--:--';
-  return this.punchOut.toLocaleTimeString('en-US', { 
+  return this.punchOut.toLocaleTimeString('en-IN', { 
     hour: '2-digit', 
     minute: '2-digit',
     hour12: false 

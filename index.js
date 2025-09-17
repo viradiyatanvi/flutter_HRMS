@@ -33,6 +33,8 @@ app.use('/api/calendar', require('./routes/calendarAdmin'));
 app.use('/api/calendar', require('./routes/calendarUser'));
 app.use('/api/documents', require('./routes/documents'));
 app.use('/api/expense',require('./routes/Travel&Exprense'));
+app.use('/api/payroll/admin', require('./routes/payrollAdmin'));
+app.use('/api/payroll', require('./routes/payrollUser'));
 
 app.listen(port, '0.0.0.0', (err) => {
   if (err) { console.log('Server failed to start', err); return; }

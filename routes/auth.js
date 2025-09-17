@@ -93,9 +93,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-
-
 router.get('/me', authenticateJWT, async (req, res) => {
   try {
     const user = await User.findById(req.user._id)

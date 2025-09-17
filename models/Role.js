@@ -11,7 +11,7 @@ const modulePermissionSchema = new mongoose.Schema({
   module: {
     type: String,
     required: true,
-    enum: ['User', 'Role', 'Award', 'Transfer', 'Resignation', 'Travel', 'Promotion']
+    enum: ['User', 'Role', 'Award', 'Transfer', 'Resignation', 'Travel', 'Promotion','Payroll']
   },
   permissions: permissionSchema
 });
