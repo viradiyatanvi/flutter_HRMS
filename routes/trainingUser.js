@@ -32,7 +32,7 @@ router.get('/courses', authenticateJWT, isEmployee, async (req, res) => {
     }
 
     const courses = await TrainingCourse.find(query)
-      .select('-modules.content') // Don't include full content in listing
+      .select('-modules.content') 
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -237,13 +237,11 @@ router.post('/enrollments/:id/complete-module', authenticateJWT, isEmployee, asy
       return res.status(400).json({ message: 'You have dropped this course' });
     }
 
-    // Check if module exists in course
     const module = enrollment.course.modules.id(moduleId);
     if (!module) {
       return res.status(404).json({ message: 'Module not found' });
     }
 
-    // Check if module is already completed
     const alreadyCompleted = enrollment.completedModules.some(
       m => m.moduleId.toString() === moduleId
     );
@@ -310,8 +308,6 @@ router.get('/certificates/:id/download', authenticateJWT, isEmployee, async (req
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // In a real application, you would generate a PDF here
-    // For now, we'll return the certificate data
     res.json({
       certificateId: certificate.certificateId,
       userName: `${certificate.user.firstName} ${certificate.user.lastName}`,

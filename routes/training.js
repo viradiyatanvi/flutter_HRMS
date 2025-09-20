@@ -120,7 +120,6 @@ router.delete('/admin/courses/:id', authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    // Check if there are enrollments for this course
     const enrollmentsCount = await Enrollment.countDocuments({ course: req.params.id });
     if (enrollmentsCount > 0) {
       return res.status(400).json({ 
@@ -239,7 +238,6 @@ router.post('/admin/enrollments/:id/certificate', authenticateJWT, async (req, r
       course: enrollment.course._id,
       enrollment: enrollment._id,
       issuedAt: new Date(),
-      // Set expiration date to 2 years from now
       expirationDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000),
       downloadUrl: `/api/training/certificates/${certificateId}/download`,
       verified: true

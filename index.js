@@ -4,6 +4,22 @@ const passport = require('./config/passport-jwt');
 require('dotenv').config();
 const cors = require('cors');
 
+
+const fs = require('fs');
+const path = require('path');
+
+const uploadDirs = [
+    path.join(__dirname, 'Uploads', 'Course'),
+    path.join(__dirname, 'Uploads', 'Certificate')
+];
+
+uploadDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+        console.log(`Created directory: ${dir}`);
+    }
+});
+
 const app = express();
 require('./config/db');
 

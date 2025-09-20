@@ -101,41 +101,6 @@ router.get('/admin/user/:userId', authenticateJWT, async (req, res) => {
 });
 
 // Upload document (Employee)
-// router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
-//   try {
-//     const { name, type, fileUrl } = req.body;
-
-//     if (!name || !type || !fileUrl) {
-//       return res.status(400).json({ message: 'Name, type, and fileUrl are required' });
-//     }
-
-//     let profile = await UserProfile.findOne({ user: req.user._id });
-
-//     if (!profile) {
-//       profile = new UserProfile({ user: req.user._id });
-//     }
-
-//     profile.documents.push({
-//       name,
-//       type,
-//       fileUrl
-//     });
-
-//     await profile.save();
-    
-//     // Update user reference to profile if it's a new profile
-//     if (!req.user.profile) {
-//       await User.findByIdAndUpdate(req.user._id, { profile: profile._id });
-//     }
-    
-//     res.status(201).json(profile);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
-
-// Upload document (Employee)
 router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
   try {
     const { name, type, fileUrl } = req.body;
@@ -148,19 +113,19 @@ router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
 
     if (!profile) {
       profile = new UserProfile({ user: req.user._id });
-      await profile.save();
-      
-      await User.findByIdAndUpdate(req.user._id, { profile: profile._id });
     }
 
     profile.documents.push({
       name,
       type,
-      fileUrl,
-      uploadedAt: new Date()
+      fileUrl
     });
 
     await profile.save();
+    
+    if (!req.user.profile) {
+      await User.findByIdAndUpdate(req.user._id, { profile: profile._id });
+    }
     
     res.status(201).json(profile);
   } catch (err) {
@@ -168,6 +133,40 @@ router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Upload document (Employee)
+// router.post('/documents', authenticateJWT, isEmployee, async (req, res) => {
+//   try {
+//     const { name, type, fileUrl } = req.body;
+
+//     if (!name || !type || !fileUrl) {
+//       return res.status(400).json({ message: 'Name, type, and fileUrl are required' });
+//     }
+
+//     let profile = await UserProfile.findOne({ user: req.user._id });
+
+//     if (!profile) {
+//       profile = new UserProfile({ user: req.user._id });
+//       await profile.save();
+      
+//       await User.findByIdAndUpdate(req.user._id, { profile: profile._id });
+//     }
+
+//     profile.documents.push({
+//       name,
+//       type,
+//       fileUrl,
+//       uploadedAt: new Date()
+//     });
+
+//     await profile.save();
+    
+//     res.status(201).json(profile);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 
 // Add this route for creating profile
 router.post('/create', authenticateJWT, isEmployee, async (req, res) => {
