@@ -602,6 +602,45 @@ router.get('/download-document/:documentId', authenticateJWT, isOwnData, async (
 });
 
 
+// Admin download document route
+router.get('/admin/download-document/:documentId/:userId', authenticateJWT, async (req, res) => {
+  try {
+    // Check if user is admin/HR
+    if (!['Admin', 'HR Manager'].includes(req.user.role.accessLevel)) {
+      return res.status(403).json({ message: 'Access denied. Admin/HR privileges required.' });
+    }
+
+    const { documentId, userId } = req.params;
+
+    // Find profile by user ID
+    const profile = await UserProfile.findOne({ user: userId });
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    const document = profile.documents.id(documentId);
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    const filePath = path.join(__dirname, '..', document.fileUrl.replace('/uploads', '/Uploads'));
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'File not found on server' });
+    }
+
+    res.setHeader('Content-Disposition', `attachment; filename="${document.fileName}"`);
+    res.setHeader('Content-Type', document.mimeType || 'application/octet-stream');
+
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 // Delete document
 router.delete('/document/:documentId', authenticateJWT, isEmployee, async (req, res) => {
   try {
