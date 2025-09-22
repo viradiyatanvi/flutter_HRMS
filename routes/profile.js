@@ -601,6 +601,7 @@ router.get('/download-document/:documentId', authenticateJWT, isOwnData, async (
   }
 });
 
+
 // Delete document
 router.delete('/document/:documentId', authenticateJWT, isEmployee, async (req, res) => {
   try {
@@ -704,5 +705,7 @@ function checkProfileCompletion(profile) {
 
   return requiredFields.every(field => field !== undefined && field !== null && field !== '');
 }
+
+
 
 module.exports = router;
