@@ -457,7 +457,6 @@ routes.put("/admin/updateCourse/:id", authenticateJWT, Courses.uploadImageFile, 
 
             // Update content
             if (req.files.content) {
-                // Delete old content
                 if (findCourse.content && findCourse.content.length > 0) {
                     findCourse.content.forEach((item) => {
                         const filePath = path.join(__dirname, "..", item.url);
@@ -465,7 +464,6 @@ routes.put("/admin/updateCourse/:id", authenticateJWT, Courses.uploadImageFile, 
                     });
                 }
 
-                // Add new content
                 req.body.content = req.files.content.map((file) => ({
                     title: file.originalname,
                     type: file.mimetype.includes('pdf') ? 'pdf' :
@@ -475,7 +473,6 @@ routes.put("/admin/updateCourse/:id", authenticateJWT, Courses.uploadImageFile, 
                 }));
             }
         } else {
-            // Keep existing files if no new files uploaded
             req.body.image = findCourse.image;
             req.body.content = findCourse.content;
         }
@@ -517,37 +514,6 @@ routes.get('/admin/enroll', authenticateJWT, async (req, res) => {
         return res.status(500).json({ msg: 'Failed to fetch enrollments', err: err.message });
     }
 });
-
-
-
-// Create Certificate
-// routes.post('/admin/certificate/:userId/:courseId', authenticateJWT, Certificate.uploadImageFile, async (req, res) => {
-//     try {
-//         let enrollment = await Enrollement.findOne({
-//             userId: req.params.userId,
-//             courseId: req.params.courseId
-//         });
-
-//         if (!enrollment || enrollment.status !== 'Completed') {
-//             return res.status(400).json({ msg: 'Course not completed yet, certificate not allowed' });
-//         }
-
-//         let newImg = '';
-//         if (req.file) {
-//             newImg = Certificate.ImgPath + '/' + req.file.filename;
-//         }
-
-//         let createCertificate = await Certificate.create({
-//             userId: req.params.userId,
-//             courseId: req.params.courseId,
-//             certificateUrl: newImg,
-//         });
-
-//         return res.status(200).json({ msg: 'Certificate created successfully', data: createCertificate });
-//     } catch (err) {
-//         return res.status(500).json({ msg: 'Certificate creation failed', err: err.message });
-//     }
-// });
 
 // Create Certificate - Fixed Route
 routes.post('/admin/certificate/:userId/:courseId', authenticateJWT, async (req, res) => {
@@ -626,78 +592,181 @@ routes.post('/admin/certificate/:userId/:courseId', authenticateJWT, async (req,
 });
 
 // routes/course.js
-routes.post('/admin/certificate', async (req, res) => {
-  try {
-    const { userId, courseId, certificateTemplate, verified } = req.body;
+// routes.post('/admin/certificate', async (req, res) => {
+//   try {
+//     const { userId, courseId, certificateTemplate, verified } = req.body;
 
-    // Validate required fields
-    if (!userId || !courseId) {
-      return res.status(400).json({
-        success: false,
-        message: 'UserId and CourseId are required'
-      });
+//     // Validate required fields
+//     if (!userId || !courseId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'UserId and CourseId are required'
+//       });
+//     }
+
+//     // Check if user exists
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'User not found'
+//       });
+//     }
+
+//     // Check if course exists
+//     const course = await Courses.findById(courseId);
+//     if (!course) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Course not found'
+//       });
+//     }
+
+//     // Check if certificate already exists
+//     const existingCertificate = await Certificate.findOne({
+//       userId: userId,
+//       courseId: courseId
+//     });
+
+//     if (existingCertificate) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Certificate already exists for this user and course'
+//       });
+//     }
+
+//     // Create new certificate
+//     const certificate = new Certificate({
+//       userId: userId,
+//       courseId: courseId,
+//       certificateUrl: '', // You can generate this later
+//       issueDate: new Date(),
+//       verified: verified || false,
+//       certificateTemplate: certificateTemplate || 'default'
+//     });
+
+//     await certificate.save();
+
+//     // Populate the certificate with user and course data
+//     await certificate.populate('userId', 'name email');
+//     await certificate.populate('courseId', 'title duration');
+
+//     res.status(201).json({
+//       success: true,
+//       message: 'Certificate created successfully',
+//       data: certificate
+//     });
+
+//   } catch (error) {
+//     console.error('Certificate creation error:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Internal server error'
+//     });
+//   }
+// });
+
+// Fix the certificate creation endpoint - use this one only
+routes.post('/admin/certificate', authenticateJWT, async (req, res) => {
+    try {
+        const { userId, courseId, certificateTemplate, verified } = req.body;
+
+        console.log('Certificate creation request:', {
+            userId: userId,
+            courseId: courseId,
+            body: req.body
+        });
+
+        // Validate required fields
+        if (!userId || !courseId) {
+            return res.status(400).json({
+                success: false,
+                message: 'UserId and CourseId are required'
+            });
+        }
+
+        // Check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Check if course exists
+        const course = await Courses.findById(courseId);
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: 'Course not found'
+            });
+        }
+
+        // Check if enrollment exists and course is completed
+        let enrollment = await Enrollement.findOne({
+            userId: userId,
+            courseId: courseId
+        }).populate('courseId').populate('userId');
+
+        if (!enrollment) {
+            return res.status(404).json({ 
+                message: 'Enrollment not found for this user and course' 
+            });
+        }
+
+        if (enrollment.status !== 'Completed') {
+            return res.status(400).json({ 
+                message: 'Course not completed yet, certificate not allowed',
+                currentStatus: enrollment.status,
+                progress: enrollment.progress
+            });
+        }
+
+        // Check if certificate already exists
+        const existingCertificate = await Certificate.findOne({
+            userId: userId,
+            courseId: courseId
+        });
+
+        if (existingCertificate) {
+            return res.status(400).json({ 
+                message: 'Certificate already exists for this enrollment',
+                certificateId: existingCertificate._id
+            });
+        }
+
+        // Create certificate
+        const certificateData = {
+            userId: userId,
+            courseId: courseId,
+            certificateUrl: '', // Empty for now
+            issueDate: new Date(),
+            verified: verified || false,
+            certificateTemplate: certificateTemplate || 'default'
+        };
+
+        let createCertificate = await Certificate.create(certificateData);
+
+        // Populate the created certificate
+        createCertificate = await Certificate.findById(createCertificate._id)
+            .populate('courseId')
+            .populate('userId', 'name email');
+
+        console.log('Certificate created successfully:', createCertificate);
+
+        return res.status(201).json({ 
+            message: 'Certificate created successfully', 
+            data: createCertificate 
+        });
+
+    } catch (err) {
+        console.error('Certificate creation error:', err);
+        return res.status(500).json({ 
+            message: 'Certificate creation failed', 
+            error: err.message
+        });
     }
-
-    // Check if user exists
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Check if course exists
-    const course = await Courses.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        message: 'Course not found'
-      });
-    }
-
-    // Check if certificate already exists
-    const existingCertificate = await Certificate.findOne({
-      userId: userId,
-      courseId: courseId
-    });
-
-    if (existingCertificate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Certificate already exists for this user and course'
-      });
-    }
-
-    // Create new certificate
-    const certificate = new Certificate({
-      userId: userId,
-      courseId: courseId,
-      certificateUrl: '', // You can generate this later
-      issueDate: new Date(),
-      verified: verified || false,
-      certificateTemplate: certificateTemplate || 'default'
-    });
-
-    await certificate.save();
-
-    // Populate the certificate with user and course data
-    await certificate.populate('userId', 'name email');
-    await certificate.populate('courseId', 'title duration');
-
-    res.status(201).json({
-      success: true,
-      message: 'Certificate created successfully',
-      data: certificate
-    });
-
-  } catch (error) {
-    console.error('Certificate creation error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
 });
 
 // Verify Certificate

@@ -605,14 +605,12 @@ router.get('/download-document/:documentId', authenticateJWT, isOwnData, async (
 // Admin download document route
 router.get('/admin/download-document/:documentId/:userId', authenticateJWT, async (req, res) => {
   try {
-    // Check if user is admin/HR
     if (!['Admin', 'HR Manager'].includes(req.user.role.accessLevel)) {
       return res.status(403).json({ message: 'Access denied. Admin/HR privileges required.' });
     }
 
     const { documentId, userId } = req.params;
 
-    // Find profile by user ID
     const profile = await UserProfile.findOne({ user: userId });
     if (!profile) {
       return res.status(404).json({ message: 'Profile not found' });
@@ -662,7 +660,6 @@ router.delete('/document/:documentId', authenticateJWT, isEmployee, async (req, 
       fs.unlinkSync(filePath);
     }
 
-    // Remove document from profile
     profile.documents.pull(documentId);
     await profile.save();
 
@@ -728,7 +725,6 @@ router.get('/admin/all', authenticateJWT, async (req, res) => {
   }
 });
 
-// Helper function to check profile completion
 function checkProfileCompletion(profile) {
   const requiredFields = [
     profile.dateOfBirth,

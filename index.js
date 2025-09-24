@@ -10,7 +10,8 @@ const uploadDirs = [
     path.join(__dirname, 'Uploads', 'Course'),
     path.join(__dirname, 'Uploads', 'Certificate'),
     path.join(__dirname, 'Uploads', 'ProfileImages'),
-    path.join(__dirname, 'Uploads', 'Documents')
+    path.join(__dirname, 'Uploads', 'Documents'),
+    path.join(__dirname, 'Uploads', 'Maintenance')
 ];
 
 uploadDirs.forEach(dir => {
@@ -32,7 +33,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 app.use(passport.initialize());
@@ -57,6 +57,8 @@ app.use('/api/expense', require('./routes/Travel&Exprense'));
 app.use('/api/payroll/admin', require('./routes/payrollAdmin'));
 app.use('/api/payroll', require('./routes/payrollUser'));
 app.use('/api/course', require('./routes/CourseRoutes'));
+app.use('/api/assets/admin', require('./routes/assetAdmin'));
+app.use('/api/assets', require('./routes/assetUser'));
 
 // Download endpoint for PDFs
 app.get('/api/download/:type/:filename', (req, res) => {
